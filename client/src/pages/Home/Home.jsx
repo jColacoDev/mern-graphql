@@ -1,6 +1,7 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { useQuery, useLazyQuery, gql } from '@apollo/client';
-
+import { AuthContext } from '../../context/authContext';
+import { useNavigate } from "react-router-dom";
 
 const GET_ALL_POSTS = gql`
   query {
@@ -13,8 +14,10 @@ const GET_ALL_POSTS = gql`
 `;
 
 const Home = () => {
+  let navigateTo = useNavigate();
+  const {state, dispatch} = useContext(AuthContext);
   const { data, loading, error } = useQuery(GET_ALL_POSTS);
-  
+
   const [fetchPosts, 
     { 
       data: postsData, 
@@ -23,6 +26,14 @@ const Home = () => {
     }
   ] = useLazyQuery(GET_ALL_POSTS);
   
+
+const updateUserName = () => {
+  dispatch({
+    type: 'LOGGED_IN_USER',
+    payload: 'jColaco'
+  })
+}
+
   if (loading) return <p className="p-5">Loading...</p>;
   return (
     <div className="container">
@@ -48,6 +59,14 @@ const Home = () => {
       </div>
       <hr />
       {JSON.stringify(postsData)}
+      <hr />
+      {JSON.stringify(state.user)}
+      <hr />
+      <button onClick={updateUserName} className="btn btn-primary">
+        Change user name
+      </button>
+      <hr />
+      {JSON.stringify(navigateTo)}
     </div>
   );
 };
