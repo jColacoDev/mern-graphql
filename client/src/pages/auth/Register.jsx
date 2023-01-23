@@ -1,6 +1,6 @@
 import React from 'react'
 import { auth } from '../../firebase';
-
+import { toast } from 'react-toastify'
 
 export default function Register() {
 
@@ -18,9 +18,10 @@ export default function Register() {
         await auth.sendSignInLinkToEmail(email, config);
 
         // show notification
+        toast.success(`Email is sent to ${email}. Click the link to complete registration.`)
 
         // save to local storage
-        window.localStorage.setItem('emailFormRegistration', email);
+        window.localStorage.setItem('emailForRegistration', email);
 
         setEmail('');
         setLoading(false);
@@ -28,7 +29,7 @@ export default function Register() {
 
   return (
     <div className='container'>
-        <h4>Register</h4>
+        {loading ? <h4 className='text-danger'>Loading...</h4> : <h4>Register</h4>}
         <form onSubmit={handleSubmit}>
             <div className='form-group'>
                 <label htmlFor="email">Email Address</label>

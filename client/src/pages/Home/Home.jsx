@@ -18,13 +18,7 @@ const Home = () => {
   const {state, dispatch} = useContext(AuthContext);
   const { data, loading, error } = useQuery(GET_ALL_POSTS);
 
-  const [fetchPosts, 
-    { 
-      data: postsData, 
-      loading: loadingData, 
-      error: errorData 
-    }
-  ] = useLazyQuery(GET_ALL_POSTS);
+  const [fetchPosts, {data: postsData}] = useLazyQuery(GET_ALL_POSTS);
   
 
 const updateUserName = () => {
@@ -38,7 +32,8 @@ const updateUserName = () => {
   return (
     <div className="container">
       <div className="row p-5">
-        {data.allPosts.map(p => (
+        {data &&
+          data.allPosts.map(p => (
           <div className="col-md-4" key={p.id}>
             <div className="card">
               <div className="card-body">

@@ -1,7 +1,22 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { auth } from '../firebase';
+import { AuthContext } from '../context/authContext';
 
 const Nav = () => {
+    const {state, dispatch} = useContext(AuthContext)
+    let navigate = useNavigate();
+    const { user } = state;
+
+    const logout = () => {
+        auth().signOut();
+        dispatch({
+            type: 'LOGGED_IN_USER',
+            payload: null
+        });
+        navigate('/login')
+    }
+
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-light">
             <Link className="navbar-brand" to="/">
@@ -21,6 +36,7 @@ const Nav = () => {
 
             <div className="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul className="navbar-nav mr-auto">
+                {!user && <>
                     <li className="nav-item active">
                         <Link className="nav-link" to="/login">
                             Login
@@ -31,6 +47,12 @@ const Nav = () => {
                             Register
                         </Link>
                     </li>
+                </>}
+                    {user && (
+                        <li className="nav-item">
+                            <a onClick={logout} href="/login" className='nav-item nav-link'>Logout</a>
+                        </li>
+                    )}
                 </ul>
                 <form className="form-inline my-2 my-lg-0">
                     <input className="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" />

@@ -6,13 +6,19 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 const { mergeTypeDefs, mergeResolvers } = require('@graphql-tools/merge')
 const { loadFilesSync } = require('@graphql-tools/load-files')
-
+const { authCheck } = require('./helpers/auth');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
 // express server
 const app = express();
+// middlewares
+app.use(cors());
+app.use(bodyParser.json({ limit: '10mb' }));
 
 const db = async () => {
     try{
+        mongoose.set("strictQuery", false);
         const success = await mongoose.connect(process.env.DATABASE, {})
         console.log('DB Connected')
     } catch (error){
@@ -32,6 +38,7 @@ async function startServer() {
     apolloServer = new ApolloServer({
       typeDefs,
       resolvers,
+      context: ({req, res}) => ({req, res})
     });
     await apolloServer.start();
     // applyMiddleware method connects ApolloServer to a specific HTTP framework ie: express
@@ -43,7 +50,7 @@ async function startServer() {
 const httpserver = http.createServer(app);
 
 // rest endpoint
-app.get('/rest', function(req, res) {
+app.get('/rest', authCheck, function(req, res) {
     res.json({
         data: 'you hit rest endpoint great!'
     });
