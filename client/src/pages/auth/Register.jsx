@@ -1,6 +1,7 @@
 import React from 'react'
 import { auth } from '../../firebase';
 import { toast } from 'react-toastify'
+import AuthForm from '../../components/forms/AuthForm';
 
 export default function Register() {
 
@@ -30,21 +31,12 @@ export default function Register() {
   return (
     <div className='container'>
         {loading ? <h4 className='text-danger'>Loading...</h4> : <h4>Register</h4>}
-        <form onSubmit={handleSubmit}>
-            <div className='form-group'>
-                <label htmlFor="email">Email Address</label>
-                <input type="email" id='email' 
-                    value={email} 
-                    onChange={(e)=>setEmail(e.target.value)}
-                    className="form-control"
-                    placeholder='Enter email'
-                    disabled={loading}
-                />
-            </div>
-            <button className="btn btn-raised btn-primary"
-                disabled={loading || !email}>Submit
-            </button>
-        </form>
+        <AuthForm 
+            email={email} 
+            loading={loading} 
+            setEmail={setEmail} 
+            handleSubmit={handleSubmit} 
+        />
     </div>
   )
 }
