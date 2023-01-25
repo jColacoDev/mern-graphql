@@ -7,7 +7,7 @@ export default function Image({image, handleImageRemove = f => f}) {
         key={image.public_id}
         alt={image.public_id}
         style={{ height: '100px' }}
-        className="float-right"
+        className="img-thumbnail m-3"
         onClick={()=>handleImageRemove(image.public_id)}
     />
   )

@@ -5,10 +5,9 @@ const scalars = `
 `
 const queries = `
     type Query {
-        me: String!
-    }
-    type Query {
         profile: User!
+        publicProfile(username: String!) : User!
+        allUsers: [User!]
     }
 `
 const mutations = `

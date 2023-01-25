@@ -11,10 +11,14 @@ import { AuthContext } from './context/authContext'
 import { ApolloClient, createHttpLink, InMemoryCache, ApolloProvider } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import PrivateRoute from './components/PrivateRoute';
+import PublicRoute from './components/PublicRoute';
 import PasswordUpdate from './pages/auth/PasswordUpdate';
 import PasswordForgot from './pages/auth/PasswordForgot';
 import Post from './pages/auth/post/post';
 import Profile from './pages/auth/Profile';
+import Users from './pages/Users';
+import SingleUser from './pages/SingleUser';
+
 
 const App = () => {
   const {state} = useContext(AuthContext);
@@ -46,8 +50,8 @@ const App = () => {
       <ToastContainer/>
       <Routes>
         <Route exact path="/" element={<Home/>}/>
-        <Route exact path="/register" element={<Register/>}/>
-        <Route exact path="/login" element={<Login/>}/>
+        <Route exact path="/user/:username" element={<SingleUser/>}/>
+        <Route exact path="/users" element={<Users/>}/>
         <Route exact path="/complete-registration" element={<CompleteRegistration/>}/>
         <Route exact path="/password/forgot" element={<PasswordForgot/>}/>
         <Route exact path='/password/update' element={<PrivateRoute/>}>
@@ -58,6 +62,12 @@ const App = () => {
         </Route>
         <Route exact path='/post/create' element={<PrivateRoute/>}>
           <Route exact path='/post/create' element={<Post/>}/>
+        </Route>
+        <Route exact path='/register' element={<PublicRoute/>}>
+          <Route exact path='/register' element={<Register/>}/>
+        </Route>
+        <Route exact path='/login' element={<PublicRoute/>}>
+          <Route exact path='/login' element={<Login/>}/>
         </Route>
       </Routes>
     </ApolloProvider>

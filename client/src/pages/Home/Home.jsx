@@ -2,16 +2,7 @@ import React, {useContext} from 'react';
 import { useQuery, useLazyQuery, gql } from '@apollo/client';
 import { AuthContext } from '../../context/authContext';
 import { useNavigate } from "react-router-dom";
-
-const GET_ALL_POSTS = gql`
-  query {
-    allPosts {
-      id
-      title
-      description
-    }
-  }
-`;
+import { GET_ALL_POSTS } from '../../graphql/queries';
 
 const Home = () => {
   let navigateTo = useNavigate();
