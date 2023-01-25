@@ -6,6 +6,8 @@ import { PROFILE } from '../../graphql/queries'
 import Resizer from "react-image-file-resizer";
 import axios from 'axios';
 import { AuthContext } from '../../context/authContext'
+import UserProfile from '../../components/forms/UserProfile'
+
 
 export default function Profile() {
     const {state} = useContext(AuthContext);
@@ -69,6 +71,7 @@ export default function Profile() {
         );
     });
     const fileResizeAndUpload = async (e) => {
+        setLoading(true);
         try {
             const file = e.target.files[0];
             const image = await resizeFile(file);
@@ -122,60 +125,15 @@ export default function Profile() {
 
     const {username, name, email, about, images} = values;
 
-    const profileUpdateForm = <form onSubmit={handleSubmit}>
-        <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <input type="text" 
-                name='username' 
-                value={username} 
-                onChange={handleChange} 
-                className="form-control" 
-                placeholder='Username' 
-                disabled={loading}
-            />
-        </div>
-        <div className="form-group">
-            <label htmlFor="name">Name</label>
-            <input type="text" 
-                name='name' 
-                value={name} 
-                onChange={handleChange} 
-                className="form-control" 
-                placeholder='Name' 
-                disabled={loading}
-            />
-        </div>
-        <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input type="text" 
-                name='email' 
-                value={email} 
-                onChange={handleChange} 
-                className="form-control" 
-                placeholder='Email' 
-                disabled
-            />
-        </div>
-        <div className="form-group">
-            <label htmlFor="about">About</label>
-            <textarea 
-                name='about' 
-                value={about} 
-                onChange={handleChange} 
-                className="form-control" 
-                placeholder='About' 
-                disabled={loading}
-            />
-        </div>
-        <button className="btn btn-primary"
-            type="submit"
-            disabled={!email || loading}
-        >Submit</button>
-    </form>
-
 return (
     <div className="container p-5">
         <div className="row">
+            <div className="col-md-12 pb-3">
+            { loading ? 
+                <h4 className="text-danger">Loading...</h4> : 
+                <h4>Profile</h4>
+            }
+            </div>
             <div className="col-md-3">
                 <div className="form-group">
                     <label className="btn btn-primary">
@@ -204,7 +162,12 @@ return (
                 ))}
             </div>
         </div>
-        {profileUpdateForm}
+        <UserProfile 
+            {...values}
+            loading={loading}
+            handleSubmit={handleSubmit}
+            handleChange={handleChange}
+        />
     </div>
 );
 }
