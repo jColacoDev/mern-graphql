@@ -9,8 +9,8 @@ import { USER_CREATE } from '../../graphql/mutations';
 
 const Login = () => {
     const { dispatch } = useContext(AuthContext);
-    const [email, setEmail] = useState('joao.r.colaco@gmail.com');
-    const [password, setPassword] = useState('qwertyuiop');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
     const [userCreate] = useMutation(USER_CREATE);

@@ -1,12 +1,13 @@
 import React from 'react'
 
 export default function UserProfile({
-    handleSubmit,
-    handleChange,
-    username,
-    email,
-    about,
-    loading
+    handleSubmit = (f)=>f,
+    handleChange = (f)=>f,
+    username = '',
+    name = '',
+    email = '',
+    about = '',
+    loading = false
 }) {
   return (
     <form onSubmit={handleSubmit}>

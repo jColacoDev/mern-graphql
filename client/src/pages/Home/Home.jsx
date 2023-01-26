@@ -24,14 +24,14 @@ const updateUserName = () => {
     <div className="container">
       <div className="row p-5">
         {data &&
-          data.allPosts.map(p => (
-          <div className="col-md-4" key={p.id}>
+          data.allPosts.map(post => (
+          <div className="col-md-4" key={post._id}>
             <div className="card">
               <div className="card-body">
                 <div className="card-title">
-                  <h4>{p.title}</h4>
+                  <h4>@{post.postedBy.username}</h4>
                 </div>
-                <p className="card-text">{p.description}</p>
+                <p className="card-text">{post.content}</p>
               </div>
             </div>
           </div>

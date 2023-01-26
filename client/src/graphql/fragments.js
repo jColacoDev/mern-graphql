@@ -1,3 +1,15 @@
+export const POST_DATA =`
+    _id
+    content
+    image {
+        url
+        public_id
+    }
+    postedBy {
+        _id
+        username
+    }
+`
 export const USER_INFO =`
     _id
     name

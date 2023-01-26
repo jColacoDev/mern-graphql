@@ -9,7 +9,7 @@ const Nav = () => {
     const { user } = state;
 
     const logout = () => {
-        auth().signOut();
+        auth.signOut();
         dispatch({
             type: 'LOGGED_IN_USER',
             payload: null
@@ -62,7 +62,8 @@ const Nav = () => {
                 </>}
                     {user && (
                         <li className="nav-item">
-                            <a onClick={logout} href="/login" className='nav-item nav-link'>Logout</a>
+                            <Link onClick={logout} to="/login"   className='nav-item nav-link'>Logout
+                            </Link>
                         </li>
                     )}
                 </ul>
