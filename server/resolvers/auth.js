@@ -2,6 +2,7 @@ const {authCheck} = require('../helpers/auth')
 const User = require('../models/user')
 const shortid = require('shortid')
 
+// queries
 const profile = async (parent, args, {req, res}) => {
     const currentUser = await authCheck(req);
     return await User.findOne({email: currentUser.email}).exec();
@@ -15,6 +16,7 @@ const allUsers = async (parent, args, {req, res}) => {
     return await User.find({}).exec();
 }
 
+// mutations
 const userCreate = async (parent, args, {req}) => {
     const currentUser = await authCheck(req);
     const user = await User.findOne({email: currentUser.email});
