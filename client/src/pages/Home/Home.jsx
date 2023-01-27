@@ -1,56 +1,47 @@
-import React, {useContext} from 'react';
-import { useQuery, useLazyQuery, gql } from '@apollo/client';
+import React, {useContext, useState} from 'react';
+import { useQuery, useLazyQuery } from '@apollo/client';
 import { AuthContext } from '../../context/authContext';
 import { useNavigate } from "react-router-dom";
-import { GET_ALL_POSTS } from '../../graphql/queries';
+import { GET_ALL_POSTS, TOTAL_POSTS } from '../../graphql/queries';
+import PostCard from '../../components/PostCard';
+import PostPagination from '../../components/PostPagination';
 
 const Home = () => {
   let navigateTo = useNavigate();
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(3);
   const {state, dispatch} = useContext(AuthContext);
-  const { data, loading, error } = useQuery(GET_ALL_POSTS);
-
+  const { data, loading, error } = useQuery(GET_ALL_POSTS, {
+    variables: {
+      perPage,
+      page
+    },
+  });
+  const {data: postCount} = useQuery(TOTAL_POSTS)
   const [fetchPosts, {data: postsData}] = useLazyQuery(GET_ALL_POSTS);
+  let totalPages = Math.ceil(postCount && postCount.totalPosts / perPage);
   
-
-const updateUserName = () => {
-  dispatch({
-    type: 'LOGGED_IN_USER',
-    payload: 'jColaco'
-  })
-}
 
   if (loading) return <p className="p-5">Loading...</p>;
   return (
     <div className="container">
       <div className="row p-5">
         {data &&
-          data.allPosts.map(post => (
-          <div className="col-md-4" key={post._id}>
-            <div className="card">
-              <div className="card-body">
-                <div className="card-title">
-                  <h4>@{post.postedBy.username}</h4>
-                </div>
-                <p className="card-text">{post.content}</p>
-              </div>
+          data.allPosts.map((post) => (
+            <div className="col-md-4 pt-5" key={post._id}>
+              <PostCard post={post} />
             </div>
-          </div>
-        ))}
+          ))}
       </div>
-      <div className="row p-5">
-        <button onClick={()=>fetchPosts()} 
-          className="btn-raised btn-primary">
-            Fetch posts
-        </button>
-      </div>
+      <PostPagination 
+        page={page}
+        setPage={setPage}
+        totalPages={totalPages}
+      />
       <hr />
       {JSON.stringify(postsData)}
       <hr />
       {JSON.stringify(state.user)}
-      <hr />
-      <button onClick={updateUserName} className="btn btn-primary">
-        Change user name
-      </button>
       <hr />
       {JSON.stringify(navigateTo)}
     </div>

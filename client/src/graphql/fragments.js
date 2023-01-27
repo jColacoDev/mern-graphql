@@ -1,7 +1,7 @@
 export const POST_DATA =`
     _id
     content
-    image {
+    images {
         url
         public_id
     }

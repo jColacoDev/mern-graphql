@@ -4,17 +4,17 @@ const {ObjectId} = mongoose.Schema;
 const postSchema = new mongoose.Schema({
     content: {
         type: String,
-        required: 'Content is required'
+        required: 'Content is required',
+        text: true
     },
-    image: {
-        url: {
-            type: String,
-            default: 'https://via.placeholder.com/200?text=Profile'
-        },
-        public_id: {
-            type: String,
-            default: Date.now
-        }
+    images: {
+        type: Array,
+        default: [
+            {
+                url: 'https://via.placeholder.com/200?text=Profile',
+                public_id: Date.now()
+            }
+        ]
     },
     postedBy: {
         type: ObjectId,

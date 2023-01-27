@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useContext} from 'react'
+import React, {useState, useMemo, useContext, useEffect} from 'react'
 import Resizer from "react-image-file-resizer";
 import axios from 'axios';
 import { AuthContext } from '../context/authContext';
@@ -8,7 +8,11 @@ export default function FileUpload({values, loading, setLoading, setValues}) {
     const {state} = useContext(AuthContext);
     const {images} = values;
 
-    
+    useEffect( () => {
+        console.log(values)
+    },[])
+
+
     const resizeFile = (file) => new Promise((resolve) => {
         Resizer.imageFileResizer(
             file,

@@ -18,6 +18,9 @@ import Post from './pages/auth/post/post';
 import Profile from './pages/auth/Profile';
 import Users from './pages/Users';
 import SingleUser from './pages/SingleUser';
+import PostUpdate from './pages/auth/post/PostUpdate';
+import SinglePost from './pages/auth/post/SinglePost';
+import SearchResults from './components/SearchResults';
 
 
 const App = () => {
@@ -51,6 +54,8 @@ const App = () => {
       <Routes>
         <Route exact path="/" element={<Home/>}/>
         <Route exact path="/user/:username" element={<SingleUser/>}/>
+        <Route exact path="/post/:postid" element={<SinglePost/>}/>
+        <Route exact path="/search/:query" element={<SearchResults/>}/>
         <Route exact path="/users" element={<Users/>}/>
         <Route exact path="/complete-registration" element={<CompleteRegistration/>}/>
         <Route exact path="/password/forgot" element={<PasswordForgot/>}/>
@@ -62,6 +67,9 @@ const App = () => {
         </Route>
         <Route exact path='/post/create' element={<PrivateRoute/>}>
           <Route exact path='/post/create' element={<Post/>}/>
+        </Route>
+        <Route exact path='/post/update' element={<PrivateRoute/>}>
+          <Route exact path='/post/update/:postid' element={<PostUpdate/>}/>
         </Route>
         <Route exact path='/register' element={<PublicRoute/>}>
           <Route exact path='/register' element={<Register/>}/>
