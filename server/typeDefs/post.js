@@ -16,6 +16,12 @@ const mutations = `
         postDelete(postId: String!): Post!
     }
 `
+const subscriptions = `
+    type Subscription {
+        postAdded: Post
+    }
+    
+`
 const types = `
     type Post {
         _id: ID!
@@ -35,4 +41,4 @@ const inputs = `
         images: [ImageInput]
     }
 `
-module.exports = gql`${queries}${mutations}${types}${inputs}`;
+module.exports = gql`${queries}${mutations}${subscriptions}${types}${inputs}`;

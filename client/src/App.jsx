@@ -1,17 +1,26 @@
+// React
 import React, { useContext } from 'react';
 import {Routes, Route} from 'react-router-dom'
 
+// Apollo & gql
+import { 
+  ApolloClient, 
+  InMemoryCache, 
+  ApolloProvider,
+  split,
+  HttpLink
+} from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { createClient } from 'graphql-ws';
+
+// Routes
 import Home from './pages/Home/Home'
 import Nav from './components/Nav';
 import Register from './pages/auth/Register';
 import Login from './pages/auth/Login';
-import { ToastContainer } from 'react-toastify';
 import CompleteRegistration from './pages/auth/CompleteRegistration';
-import { AuthContext } from './context/authContext'
-import { ApolloClient, createHttpLink, InMemoryCache, ApolloProvider } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
-import PrivateRoute from './components/PrivateRoute';
-import PublicRoute from './components/PublicRoute';
 import PasswordUpdate from './pages/auth/PasswordUpdate';
 import PasswordForgot from './pages/auth/PasswordForgot';
 import Post from './pages/auth/post/post';
@@ -22,33 +31,54 @@ import PostUpdate from './pages/auth/post/PostUpdate';
 import SinglePost from './pages/auth/post/SinglePost';
 import SearchResults from './components/SearchResults';
 
+// utils
+import { ToastContainer } from 'react-toastify';
+import { AuthContext } from './context/authContext'
+import PrivateRoute from './components/PrivateRoute';
+import PublicRoute from './components/PublicRoute';
+
 
 const App = () => {
   const {state} = useContext(AuthContext);
   const {user} = state;
   
-  const httpLink = createHttpLink({
-    uri: import.meta.env.VITE_GRAPHQL_ENDPOINT,
+  const wsLink = new GraphQLWsLink(createClient({
+    url: import.meta.env.VITE_GRAPHQL_WS_ENDPOINT,
+    options: {
+      shouldRetry: true
+    }
+  }));
+  const httpLink = new HttpLink({
+    uri: import.meta.env.VITE_GRAPHQL_HTTP_ENDPOINT,
   });
+  
   const authLink = setContext((_, { headers }) => {
-    const token = user ? user.token : '';
     return {
       headers: {
         ...headers,
-        authtoken: token,
+        authtoken: user ? user.token : ''
       }
     }
   });
-  const client = new ApolloClient({
-    link: authLink.concat(httpLink),
+  const httpAuthLink = authLink.concat(httpLink);
+  
+  const splitLink = split(({query}) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
+    );
+  }, wsLink, httpAuthLink)   
+
+  const apolloClient = new ApolloClient({
+    link: splitLink,
     cache: new InMemoryCache({
       addTypename: false
     })
   });
-  
 
   return (
-    <ApolloProvider client={client}>
+    <ApolloProvider client={apolloClient}>
       <Nav/>
       <ToastContainer/>
       <Routes>

@@ -1,10 +1,12 @@
 import React, {useContext, useState} from 'react';
-import { useQuery, useLazyQuery } from '@apollo/client';
+import { useQuery, useLazyQuery, useSubscription } from '@apollo/client';
 import { AuthContext } from '../../context/authContext';
 import { useNavigate } from "react-router-dom";
-import { GET_ALL_POSTS, TOTAL_POSTS } from '../../graphql/queries';
 import PostCard from '../../components/PostCard';
 import PostPagination from '../../components/PostPagination';
+import { GET_ALL_POSTS, TOTAL_POSTS } from '../../graphql/queries';
+import { POST_ADDED } from '../../graphql/subscriptions';
+import { toast } from 'react-toastify'
 
 const Home = () => {
   let navigateTo = useNavigate();
@@ -19,9 +21,33 @@ const Home = () => {
   });
   const {data: postCount} = useQuery(TOTAL_POSTS)
   const [fetchPosts, {data: postsData}] = useLazyQuery(GET_ALL_POSTS);
+
+  const {data: newPost} = useSubscription(POST_ADDED, {
+    onSubscriptionData: async ({
+      client: {cache}, 
+      subscriptionData: {data}
+    }) => {
+      const {allPosts} = cache.readQuery({
+        query: GET_ALL_POSTS,
+        variables: { perPage, page }
+      })
+      cache.writeQuery({
+        query: GET_ALL_POSTS,
+        variables: { perPage, page },
+        data: {
+          allPosts: [data.postAdded, ...allPosts]
+        }
+      })
+      fetchPosts({
+        variables: {page},
+        refetchQueries: [{query: GET_ALL_POSTS, variables: {perPage, page}}]
+      })
+      toast.success('New post!');
+    }
+  })
+
   let totalPages = Math.ceil(postCount && postCount.totalPosts / perPage);
   
-
   if (loading) return <p className="p-5">Loading...</p>;
   return (
     <div className="container">
@@ -39,7 +65,7 @@ const Home = () => {
         totalPages={totalPages}
       />
       <hr />
-      {JSON.stringify(postsData)}
+      {JSON.stringify(newPost)}
       <hr />
       {JSON.stringify(state.user)}
       <hr />

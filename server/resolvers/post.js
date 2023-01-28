@@ -2,6 +2,9 @@ const {authCheck} = require('../helpers/auth')
 const Post = require('../models/post')
 const User = require('../models/user')
 
+// subscriptions
+const POST_ADDED = "POST_ADDED";
+
 // queries
 const search = async (parent, args, {req}) => {
     const {query} = args;
@@ -44,7 +47,6 @@ const postsByUser = async (parent, args, {req}) => {
     .sort({createdAt: -1})
 }
 
-
 // mutations
 const postUpdate = async (parent, args, {req}) => {
     const currentUser = await authCheck(req);
@@ -78,7 +80,7 @@ const postDelete = async (parent, args, {req}) => {
 
     return deletedPost;
 }
-const postCreate = async (parent, args, {req}) => {
+const postCreate = async (parent, args, {req, pubsub}) => {
     const currentUser = await authCheck(req);
     if(args.input.content.trim() === '') throw new Error('Content is required');
 
@@ -92,6 +94,8 @@ const postCreate = async (parent, args, {req}) => {
     }).save()
     .then(post => post.populate('postedBy', '_id username'))
     
+    pubsub.publish(POST_ADDED, {postAdded: newPost});
+
     return newPost;
 }
 
@@ -107,5 +111,10 @@ module.exports = {
         postDelete,
         postCreate,
         postUpdate
+    },
+    Subscription: {
+        postAdded: {
+            subscribe: (parent, args, {pubsub}) => pubsub.asyncIterator([POST_ADDED])
+        }
     }
 };
