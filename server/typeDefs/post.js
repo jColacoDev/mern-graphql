@@ -18,7 +18,9 @@ const mutations = `
 `
 const subscriptions = `
     type Subscription {
-        postAdded: Post
+        postCreated: Post
+        postUpdated: Post
+        postDeleted: Post
     }
     
 `

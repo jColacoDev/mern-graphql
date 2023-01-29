@@ -5,10 +5,11 @@ import { useNavigate } from "react-router-dom";
 import PostCard from '../../components/PostCard';
 import PostPagination from '../../components/PostPagination';
 import { GET_ALL_POSTS, TOTAL_POSTS } from '../../graphql/queries';
-import { POST_ADDED } from '../../graphql/subscriptions';
+import { POST_CREATED, POST_UPDATED, POST_DELETED } from '../../graphql/subscriptions';
 import { toast } from 'react-toastify'
 
 const Home = () => {
+
   let navigateTo = useNavigate();
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(3);
@@ -22,10 +23,10 @@ const Home = () => {
   const {data: postCount} = useQuery(TOTAL_POSTS)
   const [fetchPosts, {data: postsData}] = useLazyQuery(GET_ALL_POSTS);
 
-  const {data: newPost} = useSubscription(POST_ADDED, {
-    onSubscriptionData: async ({
+  const {data: postCreated} = useSubscription(POST_CREATED, {
+    onData: async ({
       client: {cache}, 
-      subscriptionData: {data}
+      data: {data}
     }) => {
       const {allPosts} = cache.readQuery({
         query: GET_ALL_POSTS,
@@ -35,16 +36,24 @@ const Home = () => {
         query: GET_ALL_POSTS,
         variables: { perPage, page },
         data: {
-          allPosts: [data.postAdded, ...allPosts]
+          allPosts: [data.postCreated, ...allPosts]
         }
       })
       fetchPosts({
         variables: {page},
-        refetchQueries: [{query: GET_ALL_POSTS, variables: {perPage, page}}]
+        refetchQueries: [{query: GET_ALL_POSTS}]
+        // refetchQueries: [{query: GET_ALL_POSTS, variables: {perPage, page}}]
       })
-      toast.success('New post!');
+      toast.success('Post Created!');
     }
   })
+  const {data: postUpdated} = useSubscription(POST_UPDATED, {
+    onData: () => {
+      toast.success('Post Updated!');
+    }
+  });
+  const {data: postDeleted} = useSubscription(POST_DELETED);
+
 
   let totalPages = Math.ceil(postCount && postCount.totalPosts / perPage);
   
@@ -65,7 +74,7 @@ const Home = () => {
         totalPages={totalPages}
       />
       <hr />
-      {JSON.stringify(newPost)}
+      {JSON.stringify(postUpdated)}
       <hr />
       {JSON.stringify(state.user)}
       <hr />

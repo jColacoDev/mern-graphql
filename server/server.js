@@ -33,6 +33,11 @@ const path = require('path');
 (async () => {
     // express app
     const app = express();
+    app.use(
+        cors(),
+        bodyParser.json({ limit: '10mb' })
+    );
+
     /*******************************************************************/
     // Servers 
     /*******************************************************************/
@@ -71,8 +76,6 @@ const path = require('path');
     // middlewares
     app.use(
         graphqlPath,
-        cors(),
-        bodyParser.json({ limit: '10mb' }),
         expressMiddleware(apolloServer, {
             context: ({req}) => ({req, pubsub})
         }),
@@ -120,7 +123,7 @@ const path = require('path');
     /***********************/
     // GET endpoints
     /***********************/
-    app.get('/rest', authCheck, function(req, res) {
+    app.get('/rest', authCheckMiddleware, function(req, res) {
         res.json({
             data: 'you hit rest endpoint great!'
         });
@@ -137,8 +140,8 @@ const path = require('path');
         });
     });
     app.post('/uploadimages', authCheckMiddleware, function(req, res) {
-        console.log('...UPLOADING ...')
-        console.log(req.body)
+        console.log('...UPLOADING ...');
+        console.log(req.body);
         cloudinary.uploader.upload(req.body.image, result => {
             res.send({
                 url: result.secure_url,

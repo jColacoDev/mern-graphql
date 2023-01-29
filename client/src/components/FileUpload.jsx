@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useContext, useEffect} from 'react'
+import React, { useContext} from 'react'
 import Resizer from "react-image-file-resizer";
 import axios from 'axios';
 import { AuthContext } from '../context/authContext';
@@ -7,11 +7,6 @@ import Image from './Image';
 export default function FileUpload({values, loading, setLoading, setValues}) {
     const {state} = useContext(AuthContext);
     const {images} = values;
-
-    useEffect( () => {
-        console.log(values)
-    },[])
-
 
     const resizeFile = (file) => new Promise((resolve) => {
         Resizer.imageFileResizer(
@@ -34,7 +29,6 @@ export default function FileUpload({values, loading, setLoading, setValues}) {
         try {
             const file = e.target.files[0];
             const image = await resizeFile(file);
-            // console.log(image);
             axios.post(
                 `${import.meta.env.VITE_REST_ENDPOINT}/uploadimages`,
                 {image},

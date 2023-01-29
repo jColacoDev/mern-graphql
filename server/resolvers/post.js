@@ -3,7 +3,9 @@ const Post = require('../models/post')
 const User = require('../models/user')
 
 // subscriptions
-const POST_ADDED = "POST_ADDED";
+const POST_CREATED = "POST_CREATED";
+const POST_UPDATED = "POST_UPDATED";
+const POST_DELETED = "POST_DELETED";
 
 // queries
 const search = async (parent, args, {req}) => {
@@ -48,7 +50,25 @@ const postsByUser = async (parent, args, {req}) => {
 }
 
 // mutations
-const postUpdate = async (parent, args, {req}) => {
+const postCreate = async (parent, args, {req, pubsub}) => {
+    const currentUser = await authCheck(req);
+    if(args.input.content.trim() === '') throw new Error('Content is required');
+
+    const currentUserFromDb = await User.findOne({
+        email: currentUser.email
+    });
+
+    let postCreated = await new Post({
+        ...args.input,
+        postedBy: currentUserFromDb._id
+    }).save()
+    .then(post => post.populate('postedBy', '_id username'))
+    
+    pubsub.publish(POST_CREATED, { postCreated });
+
+    return postCreated;
+}
+const postUpdate = async (parent, args, {req, pubsub}) => {
     const currentUser = await authCheck(req);
     if(args.input.content.trim() === '') throw new Error('Content is required');
     const currentUserFromDb = await User.findOne({
@@ -58,15 +78,17 @@ const postUpdate = async (parent, args, {req}) => {
     if(currentUserFromDb._id.toString() !== postToUpdate.postedBy._id.toString())
         throw new Error('Unauthorized action');
 
-    let updatedPost = await Post.findByIdAndUpdate(args.input._id, 
+    let postUpdated = await Post.findByIdAndUpdate(args.input._id, 
         {...args.input}, 
         {new: true}
     ).exec()
     .then(post => post.populate('postedBy', '_id username'));
 
-    return updatedPost;
+    pubsub.publish(POST_UPDATED, { postUpdated });
+
+    return postUpdated;
 }
-const postDelete = async (parent, args, {req}) => {
+const postDelete = async (parent, args, {req, pubsub}) => {
     const currentUser = await authCheck(req);
     const currentUserFromDb = await User.findOne({
         email: currentUser.email
@@ -78,25 +100,9 @@ const postDelete = async (parent, args, {req}) => {
 
     let deletedPost = await Post.findByIdAndDelete({_id: args.postId}).exec();
 
+    pubsub.publish(POST_DELETED, { deletedPost });
+
     return deletedPost;
-}
-const postCreate = async (parent, args, {req, pubsub}) => {
-    const currentUser = await authCheck(req);
-    if(args.input.content.trim() === '') throw new Error('Content is required');
-
-    const currentUserFromDb = await User.findOne({
-        email: currentUser.email
-    });
-
-    let newPost = await new Post({
-        ...args.input,
-        postedBy: currentUserFromDb._id
-    }).save()
-    .then(post => post.populate('postedBy', '_id username'))
-    
-    pubsub.publish(POST_ADDED, {postAdded: newPost});
-
-    return newPost;
 }
 
 module.exports = {
@@ -113,8 +119,14 @@ module.exports = {
         postUpdate
     },
     Subscription: {
-        postAdded: {
-            subscribe: (parent, args, {pubsub}) => pubsub.asyncIterator([POST_ADDED])
+        postCreated: {
+            subscribe: (parent, args, {pubsub}) => pubsub.asyncIterator([POST_CREATED])
+        },
+        postUpdated: {
+            subscribe: (parent, args, {pubsub}) => pubsub.asyncIterator([POST_UPDATED])
+        },
+        postDeleted: {
+            subscribe: (parent, args, {pubsub}) => pubsub.asyncIterator([POST_DELETED])
         }
     }
 };
