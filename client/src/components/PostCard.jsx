@@ -13,9 +13,11 @@ const PostCard = ({
     return (
         <div className="card text-center" style={{ minHeight: '375px' }}>
             <div className="card-body">
-                <Link to={`/post/${post._id}`}>
-                    <Image image={images[0]} />
-                </Link>
+                {images[0] &&
+                    <Link to={`/post/${post._id}`}>
+                        <Image image={images[0]} />
+                    </Link>
+                }
                 <h4 className="text-primary">@{post.postedBy.username}</h4>
                 <hr />
                 <small>{content}</small>

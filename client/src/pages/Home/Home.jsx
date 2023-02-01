@@ -8,6 +8,12 @@ import { GET_ALL_POSTS, TOTAL_POSTS } from '../../graphql/queries';
 import { POST_CREATED, POST_UPDATED, POST_DELETED } from '../../graphql/subscriptions';
 import { toast } from 'react-toastify'
 
+function update(arr, _id, updatedData) {
+  return arr.map((item) =>
+    item._id === _id ? { ...item, ...updatedData } : item
+  )
+}
+
 const Home = () => {
 
   let navigateTo = useNavigate();
@@ -36,24 +42,64 @@ const Home = () => {
         query: GET_ALL_POSTS,
         variables: { perPage, page },
         data: {
-          allPosts: [data.postCreated, ...allPosts]
+          allPosts: [data.postCreated, ...allPosts.slice(0, perPage -1)]
         }
       })
       fetchPosts({
-        variables: {page},
-        refetchQueries: [{query: GET_ALL_POSTS}]
-        // refetchQueries: [{query: GET_ALL_POSTS, variables: {perPage, page}}]
+        variables: {perPage, page},
+        // refetchQueries: [{query: GET_ALL_POSTS}]
+        refetchQueries: [{query: GET_ALL_POSTS, variables: {perPage, page}}]
       })
       toast.success('Post Created!');
     }
   })
   const {data: postUpdated} = useSubscription(POST_UPDATED, {
-    onData: () => {
+    onData: async({
+      client: {cache}, 
+      data: {data}
+    }) => {
+      console.log(data.postUpdated)
+      
+      const {allPosts} = cache.readQuery({
+        query: GET_ALL_POSTS,
+        variables: { perPage, page }
+      })
+      
+      cache.writeQuery({
+        query: GET_ALL_POSTS,
+        variables: { perPage, page },
+        data: {
+          allPosts: update(allPosts, data.postUpdated._id, data.postUpdated)
+        }
+      })
+      
       toast.success('Post Updated!');
     }
   });
-  const {data: postDeleted} = useSubscription(POST_DELETED);
-
+  const {data: postDeleted} = useSubscription(POST_DELETED, {
+    onData: async ({
+      client: {cache}, 
+      data: {data}
+    }) => {
+      const {allPosts} = cache.readQuery({
+        query: GET_ALL_POSTS,
+        variables: { perPage, page }
+      })
+      cache.writeQuery({
+        query: GET_ALL_POSTS,
+        variables: { perPage, page },
+        data: {
+          allPosts: allPosts.filter((post)=>post?._id !== data.postDeleted?._id)
+        }
+      })
+      fetchPosts({
+        variables: {page},
+        // refetchQueries: [{query: GET_ALL_POSTS}]
+        refetchQueries: [{query: GET_ALL_POSTS, variables: {perPage, page}}]
+      })
+      toast.error('Post Deleted!');
+    }
+  })
 
   let totalPages = Math.ceil(postCount && postCount.totalPosts / perPage);
   

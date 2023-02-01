@@ -1,6 +1,11 @@
 import { gql } from "apollo-boost"
 import { USER_INFO, POST_DATA } from "./fragments"
 
+export const TOTAL_POSTS = gql`
+  query {
+    totalPosts
+  }
+`;
 export const SEARCH = gql`
     query search($query: String!){
         search(query: $query) {
@@ -8,18 +13,6 @@ export const SEARCH = gql`
         }
     }
 `
-export const PROFILE = gql`
-    query {
-        profile {
-            ${USER_INFO}
-        }
-    }
-`
-export const TOTAL_POSTS = gql`
-  query {
-    totalPosts
-  }
-`;
 export const GET_ALL_POSTS = gql`
   query allPosts($page: Int, $perPage: Int) {
     allPosts(page: $page, perPage: $perPage) {
@@ -42,6 +35,20 @@ export const POSTS_BY_USER = gql`
   }
 `;
 
+const postData_queries = [
+  SEARCH,
+  POSTS_BY_USER,
+  SINGLE_POST,
+  GET_ALL_POSTS
+]
+
+export const PROFILE = gql`
+    query {
+        profile {
+            ${USER_INFO}
+        }
+    }
+`
 export const GET_ALL_USERS = gql`
   query {
     allUsers {
